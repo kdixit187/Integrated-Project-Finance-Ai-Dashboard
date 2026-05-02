@@ -323,19 +323,30 @@ st.markdown("""
 # -------- INPUT ROW --------
 col1, col2 = st.columns([4, 1], gap="medium")
 
+# -------- ENTER-TO-APPLY (press Enter in the text field to trigger run) --------
+if "run_pressed" not in st.session_state:
+    st.session_state["run_pressed"] = False
+
+def _enter_submit():
+    st.session_state["run_pressed"] = True
+
 with col1:
     stock = st.text_input(
         "TICKER SYMBOL",
         placeholder="e.g.  AAPL  ·  NVDA  ·  TSLA",
-        key="stock_input"
+        key="stock_input",
+        on_change=_enter_submit
     )
 
 with col2:
     st.markdown("<div style='height:28px'></div>", unsafe_allow_html=True)
     run = st.button("▸ RUN ANALYSIS")
 
+    # treat Enter (session flag) the same as pressing the Run button
+    triggered = run or st.session_state.get("run_pressed", False)
+
 # -------- OUTPUT --------
-if run and stock:
+if triggered and stock:
     stock_upper = stock.strip().upper()
 
     with st.spinner(f"Dispatching agents for {stock_upper}..."):
@@ -368,8 +379,12 @@ if run and stock:
     </div>
     """, unsafe_allow_html=True)
 
-elif run and not stock:
+    # reset enter flag after handling
+    st.session_state["run_pressed"] = False
+
+elif triggered and not stock:
     st.warning("Enter a stock symbol to begin analysis.")
+    st.session_state["run_pressed"] = False
 
 # -------- FOOTER --------
 else:
