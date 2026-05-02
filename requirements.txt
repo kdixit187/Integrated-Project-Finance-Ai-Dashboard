@@ -2,4 +2,4 @@ crewai
 groq
 python-dotenv
 streamlit
-
+openai
